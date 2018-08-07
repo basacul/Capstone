@@ -1,0 +1,232 @@
+---
+title: "Exploratory Data Analysis"
+author: "Lucas Antelo"
+date: "August 6, 2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Synopsis
+
+The subfolder en_US contains three text files (blogs, news and twitter). The number of lines range between 900K and 2Mio and of words between 30 and 50 Millions. From these three files a fraction was sampled and finally mixed together, that was further processed. Along the cleaning process redundancies like punctuations, numbers, symbols, composite expressions were removed or resolved - aren't to are not, etc. The whole data set was transformed to lower case. Finally 1gram, 2gram and 3gram were constructed, each comparing the set with and without stop words. 
+
+Stop words are by far more frequent than non stop words. By removing stop words like 'and', 'the' and so forth the distribution changes and differences become visible between the three files, that are significant to my eyes. There are some non Englsih words in the text, but they do not seem to cause any troubles so far along this exploration process, though an in-depth examination was not performed. 
+
+A model needs to be created such that a memory savy and runtime efficient prediction model can be created for the capstone project.
+
+## Getting the Data
+
+The data is downloaded from <https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip> and its documentation can be found at <http://www.corpora.heliohost.org/>. The downloaded file will be found in a separate folder named "data" where it will be unzipped. The data will be found in "data/final", consisting of three subfolders. For this milestone report we will only explore the "en_US" subfolder.
+
+```{r folder, echo=TRUE, warning=FALSE, cache=TRUE, results='hide'}
+
+if(!file.exists("data")){ dir.create("data") }
+
+if(!file.exists("data/Coursera-SwiftKey.zip")){
+  url <- "https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip"
+  download.file(url, destfile = "data/Coursera-SwiftKey.zip", mode="wb")
+}
+
+if(!file.exists("data/final")){ 
+  unzip("data/Coursera-SwiftKey.zip", exdir="data")
+}
+
+```
+
+## Overview Of The Downloaded Data
+
+```{r overview, echo=TRUE, warning=FALSE, cache=TRUE}
+library(ngram) # for wordcount
+
+dir()
+dir("data")
+dir("data/final") ## [1] "de_DE" "en_US" "fi_FI" "ru_RU"
+dir("data/final/en_US") ## [1] "en_US.blogs.txt"   "en_US.news.txt"    "en_US.twitter.txt"
+
+
+con <- file("data/final/en_US/en_US.blogs.txt","r")
+blog <- readLines(con, encoding = "UTF-8", skipNul = TRUE)
+close(con)
+
+# news cannot be completely read in Windows 10 , 
+# therefore "rb" instead of "r" for read in binary mode
+con <- file("data/final/en_US/en_US.news.txt","rb")
+news <- readLines(con, encoding = "UTF-8", skipNul = TRUE)
+close(con)
+
+con <- file("data/final/en_US/en_US.twitter.txt","r")
+twitter <- readLines(con, encoding = "UTF-8", skipNul = TRUE)
+close(con)
+
+print(data.frame(File = c("blogs", "news", "twitter"),
+                 MBytes = c(object.size(blog)/2^20, object.size(news)/2^20, object.size(twitter)/2^20),
+                 Lines = c(length(blog), length(news), length(twitter)),
+                 Words = c(wordcount(blog), wordcount(news), wordcount(twitter))))
+
+```
+## Cleaning The Data
+
+Languages include redundancies like punctuations, whitespaces as well as lower and upper cases in order to make it easier to use it for us humans. For our exploratory data analysis we will remove these redundancies, numbers as well as symbols like @, #, etc. Moreover, we will transform usual composite expressions to its original compositions, except for has, is and genitiv s which will be replaced by a white space to keep things simple.
+As the files are quite large, we only take a small sample of each of these three files in order to reduce the time to perform the following operations.
+
+```{r cleaning, echo=TRUE, warning=FALSE, cache=TRUE, results='hide', message=FALSE}
+library(tm)
+
+set.seed(1)
+
+# can only work with small samples due to memory constraints
+dataset <- c(sample(blog, length(blog)*0.0005),
+             sample(news, length(news)*0.0005),
+             sample(twitter, length(twitter)*0.0005))
+
+# define functions
+toSpace <- content_transformer(function(x, pattern) gsub(pattern, " ", x))
+have <- content_transformer(function(x, pattern) gsub(pattern, " have", x))
+haveNot <- content_transformer(function(x, pattern) gsub(pattern, "have not", x))
+hasNot <- content_transformer(function(x, pattern) gsub(pattern, "has not", x))
+hadNot <- content_transformer(function(x, pattern) gsub(pattern, "had not", x))
+are <- content_transformer(function(x, pattern) gsub(pattern, " are", x))
+goingTo <- content_transformer(function(x, pattern) gsub(pattern, "going to", x))
+wasNot <- content_transformer(function(x, pattern) gsub(pattern, "was not", x))
+wereNot <- content_transformer(function(x, pattern) gsub(pattern, "were not", x))
+isNot <-  content_transformer(function(x, pattern) gsub(pattern, "is not", x))
+areNot <- content_transformer(function(x, pattern) gsub(pattern, "are not", x))
+wantTo <- content_transformer(function(x, pattern) gsub(pattern, "want to", x))
+willNot <- content_transformer(function(x, pattern) gsub(pattern, "will not", x))
+didNot <- content_transformer(function(x, pattern) gsub(pattern, "did not", x))
+doesNot <- content_transformer(function(x, pattern) gsub(pattern, "does not", x))
+doNot <- content_transformer(function(x, pattern) gsub(pattern, "do not", x))
+canNot <- content_transformer(function(x, pattern) gsub(pattern, "can not", x))
+
+# clean data set
+corpus <- VCorpus(VectorSource(dataset))
+corpus <- tm_map(corpus, have, "'ve")
+corpus <- tm_map(corpus, hasNot, "hasn't")
+corpus <- tm_map(corpus, haveNot, "haven't")
+corpus <- tm_map(corpus, hadNot, "hadn't")
+corpus <- tm_map(corpus, are, "[^ a-zA-Z]+'re")
+corpus <- tm_map(corpus, goingTo, "gonna")
+corpus <- tm_map(corpus, wasNot, "wasn't")
+corpus <- tm_map(corpus, wereNot, "weren't")
+corpus <- tm_map(corpus, isNot, "isn't")
+corpus <- tm_map(corpus, areNot, "aren't")
+corpus <- tm_map(corpus, wantTo, "wanna")
+corpus <- tm_map(corpus, willNot, "won't")
+corpus <- tm_map(corpus, didNot, "didn't")
+corpus <- tm_map(corpus, doesNot, "doesn't")
+corpus <- tm_map(corpus, doNot, "don't")
+corpus <- tm_map(corpus, canNot, "can't")
+corpus <- tm_map(corpus, canNot, "cannot")
+corpus <- tm_map(corpus, canNot, "cant")
+corpus <- tm_map(corpus, toSpace, "'s")
+corpus <- tm_map(corpus, toSpace, "`s")
+corpus <- tm_map(corpus, toSpace, "´s")
+corpus <- tm_map(corpus, toSpace, "(f|ht)tp(s?)://(.*)[.][a-z]+")
+corpus <- tm_map(corpus, toSpace, "@[^\\s]+")
+corpus <- tm_map(corpus, toSpace, " [-]+ ")
+corpus <- tm_map(corpus, toSpace, " [\"]+ ")
+
+corpus <- tm_map(corpus, tolower)
+
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, removeNumbers)
+corpus <- tm_map(corpus, stripWhitespace)
+
+# splitting data set into one with and another without stop words
+corpusWithStopWords <- corpus
+corpus <- tm_map(corpus, removeWords, stopwords("en"))
+
+corpusWithStopWords  <- tm_map(corpusWithStopWords, PlainTextDocument)
+corpus <- tm_map(corpus, PlainTextDocument)
+```
+
+## Exploratory Data Analysis
+We will look at the frequencies of words, as well as 2 and 3 grams for the top 20 entries. 
+
+```{r exploration, echo=TRUE, warning=FALSE, cache=TRUE, results='hide', message=FALSE}
+library(tm) # reincluded as this library likes to disappear somehow
+library(RWeka)
+
+# define functions to process data
+bigram <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
+trigram <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
+getFrequency <- function(data) {
+  frequency <- sort(rowSums(as.matrix(data)), decreasing = TRUE)
+  return(data.frame(word = names(frequency), freq = frequency))
+}
+
+# create appropriate ngrams
+uni <- getFrequency(removeSparseTerms(TermDocumentMatrix(corpus), 0.9999))
+uniStop <- getFrequency(removeSparseTerms(TermDocumentMatrix(corpusWithStopWords), 0.9999))
+
+bi <- getFrequency(removeSparseTerms(TermDocumentMatrix(corpus, control = list(tokenize = bigram)), 0.9999))
+biStop <- getFrequency(removeSparseTerms(TermDocumentMatrix(corpusWithStopWords, control = list(tokenize = bigram)), 0.9999))
+
+tri <- getFrequency(removeSparseTerms(TermDocumentMatrix(corpus, control = list(tokenize = trigram)), 0.9999))
+triStop <- getFrequency(removeSparseTerms(TermDocumentMatrix(corpusWithStopWords, control = list(tokenize = trigram)), 0.9999))
+
+```
+
+Now we will plot the top 20 unigrams, bigrams and trigrams and compare their differences and frequencies.
+```{r plot, echo=TRUE, warning=FALSE, cache=FALSE, results='hide', message=FALSE}
+library(ggplot2)
+
+plotNgram <- function(data, label) {
+  ggplot(data[1:20,], aes(reorder(word, -freq), freq)) +
+         labs(x = label, y = "Frequency") +
+         theme(panel.grid.major = element_blank(), panel.background = element_blank(), axis.text.x = element_text(angle = 75, size = 12, hjust = 1)) +
+         geom_bar(stat = "identity", fill = I("blue"))
+}
+
+
+plotNgram(uniStop, "unigrams with stop words")
+plotNgram(uni, "unigrams without stop words")
+
+plotNgram(biStop, "bigrams with stop words")
+plotNgram(bi, "bigrams without stop words")
+
+plotNgram(triStop, "trigrams with stop words")
+plotNgram(tri, "trigrams without stop words")
+
+```
+
+
+
+```{r notes, echo=FALSE, warning=FALSE, cache=FALSE, results='hide'}
+# explore and analyze
+
+# tasks
+# 1. Exploratory analysis - perform a thorough exploratory analysis of the data, 
+#    understanding the distribution of words and relationship between the words 
+#    in the corpora. 
+# 2. Understand frequencies of words and word pairs - build figures and tables 
+#    to understand variation in the frequencies of words and word pairs in the data.
+
+# Questions to consider
+# 1. Some words are more frequent than others - what are the distributions of 
+#    word frequencies? 
+# 2. What are the frequencies of 2-grams and 3-grams in the dataset? 
+# 3. How many unique words do you need in a frequency sorted dictionary to cover 
+#    50% of all word instances in the language? 90%? 
+# 4. How do you evaluate how many of the words come from foreign languages? 
+# 5. Can you think of a way to increase the coverage -- identifying words that 
+#    may not be in the corpora or using a smaller number of words in the dictionary
+#    to cover the same number of phrases?
+
+```
+It is fascinating to see how the distribution differs with and without stop words among the ngrams. Along the cleaning process we also saw that there are some snippets of text we thought we would have removed, like 're, 's, and so forth, which shows, that either there are different apostrophes we have not thought of, or our regular expressions are not completely correct. 
+Furthermore, the frequencies among uni-, bi- and trigram differs between the set with and without stop words, decreasing with the size of the ngrams. We can see, that stop words play an important role for prediciting the next word, as they are much more frequent than non stop words. 
+We need to figure out, how big our sample needs to be in order to cover a reasonable amount of words, which we like to predict. Therefore, we need to find the optimal size in order to keep memory size and runtime to a reasonable optimum. Consequently, it would be interesting to see, if we can attain similar results by decreasing the sampling size.
+
+
+## Next steps
+
+1. We need to find a better way how to remove word fragments like 's' and 't', as well as words from foreign languages in order to  build a better dataset for the prediction model.
+2. For our model, we need to figure out, how big our ngrams need to be, in order to build a reliable data set for our prediciton model.
+3. How to optimize the sampling of these data sets and their sizes, to keep the memory size to a minimum.
+
+In the following days, we will get acquainted with the ngram and backoff models, in order to build a solid prediction model.
