@@ -152,8 +152,8 @@ library(tm) # reincluded as this library likes to disappear somehow
 library(RWeka)
 
 # define functions to process data
-bigram <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
-trigram <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
+(bigram <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2)))
+(trigram <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3)))
 getFrequency <- function(data) {
   frequency <- sort(rowSums(as.matrix(data)), decreasing = TRUE)
   return(data.frame(word = names(frequency), freq = frequency))
