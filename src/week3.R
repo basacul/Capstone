@@ -22,9 +22,5 @@
 # adapt ui.R to display entry bar and display of the next prediction
 # adapt server.R to handle input and perform next prediction
 
-sourceFiles <- system.file("data/final/en_US.blogs.txt", "txt", package="tm")
-corpus <- VCorpus(DirSource(sourceFiles, encoding="UTF-8", 
-                            pattern = "en_US.blogs.txt | en_US.news.txt | en_US.twitter.txt" ),
-                  readerControl = list( language = "en_US", load = TRUE )
-)
+
 
