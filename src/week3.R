@@ -22,5 +22,13 @@
 # adapt ui.R to display entry bar and display of the next prediction
 # adapt server.R to handle input and perform next prediction
 
-
+# The general process is:
+#
+# 1. Load data from text files  DONE
+# 2. Clean data DONE
+# 3. Generate corpus DONE
+# 4. Clean / transform the corpus DONE
+# 5. Generate n-grams & write to output files DONE
+# 6. Aggregate n-gram files to get frequencies by n-gram
+# 7. Break n-grams into "base" and "prediction" 
 
