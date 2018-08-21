@@ -2,17 +2,12 @@
 # while a shiny app runs
 # cat displays output to my console
 library(shiny)
+# needed functions and data sets for prediction model
 source("model.R")
-# Define UI for app that draws a histogram ----
+
 ui <- fluidPage(
-  
-  # App title ----
   titlePanel("Word Predictor"),
-  
-  # Sidebar layout with input and output definitions ----
   sidebarLayout(
-    
-    # Sidebar panel for inputs ----
     sidebarPanel(
       h3("How it works"),
       p("You can enter anything in the box labeled with \"Input:\" and the 
@@ -31,21 +26,16 @@ ui <- fluidPage(
       br(),
       p(img(src = "img/swiftkey.jpg", height= 41, width = 200)),
       br(),
-      # Input: Text for providing a caption ----
-      # Note: Changes made to the caption in the textInput control
-      # are updated in the output area immediately as you type
       p()
     ),
     
-    # Main panel for displaying outputs ----
+
     mainPanel(
       h3("Input: "),
       textInput(inputId = "ngram",
                 label="",
                 value = ""),
       h3("Output: "),
-      #simply ouputId = "prediction"
-      # Output: Histogram ----
       h3(textOutput("prediction")),
       p(strong(textOutput("perdiction"))),
       tags$head(tags$style("#prediction{color: red;
@@ -57,17 +47,12 @@ ui <- fluidPage(
   )
 )
 
-# Define server logic required to draw a histogram ----
+
 server <- function(input, output) {
-  # Histogram of the Old Faithful Geyser Data ----
-  # with requested number of bins
-  # This expression that generates a histogram is wrapped in a call
-  # to renderPlot to indicate that:
-  #
   # 1. It is "reactive" and therefore should be automatically
-  #    re-executed when inputs (input$bins) change
-  # 2. Its output type is a plot
-  output$prediction <-  renderText(paste("Prediction : \"", predictWord(input$ngram), "\"")) #predictWord(input$ngram)
+  #    re-executed when inputs (input$ngram) change
+  # 2. Its output type is a character
+  output$prediction <-  renderText(paste("Prediction : \"", predictWord(input$ngram), "\"")) 
   
 }
 
