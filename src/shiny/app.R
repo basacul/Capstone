@@ -16,17 +16,14 @@ ui <- fluidPage(
         numbers, why it is recommended to input your text in lower case and 
         without numbers, too. Otherwise the predictions given by the model 
         will be at random."),
-      p("The model will try to guess the next word in real time without 
-        having to push any buttons. I hope, you will enjoy using this 
-        application."),
+      p("The model will try to guess the next word in real time. 
+        I hope, you will enjoy using this awesome application."),
       p("This shiny application represents the Capstone Project for the 
         \"John Hopkins Data Science Specialization Track\" in partnerhip 
         with \"Swiftkey\" at Coursera and was optimized for mobile devices."),
-      p(img(src = "img/coursera.png", height= 53, width = 200)),
-      br(),
-      p(img(src = "img/swiftkey.jpg", height= 41, width = 200)),
-      br(),
-      p()
+      img(src = "img/coursera.png", height= 59, width = 200),
+      img(src = "img/johnhopkins.png", height= 89, width = 200),
+      img(src = "img/swiftkey.png", height= 65, width = 200)
     ),
     
 
