@@ -1,0 +1,58 @@
+Word Prediction Model for Mobile Devices
+========================================================
+author: Lucas Antelo
+date: 8/22/2018
+autosize: true
+
+1. The Problem
+2. Approach to the Problem
+3. The Solution
+4. Conclusion
+
+The Problem
+========================================================
+
+Texting on mobile devices represents an important activity in our everyday lifes, why there exist tons of
+different text messaging apps on Android and iOS. Nevertheless,these apps tend to waste our time, as:
+
+- Time wasted for typing recurrent words
+- Time wasted for typing recurrent expressions
+- Mobile device's capacity not used appropriately
+
+Therefore, we will use the mobile device's memory and processing power to predict the next words as well as expressions and save typing. Thus, the mobile device will save its user's time and allow for faster answers to messages.
+
+
+
+Approach to the Problem
+========================================================
+1. Downloaded a [collection of texts](https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip) from Blogs, News and Twitter and explored it for its content
+2. Analyzed the set of solutions for this problem like heuristic models, statistical models and machine learning.
+3. Decision for statistical model using [Stupid Backoff Model](http://www.aclweb.org/anthology/D07-1090.pdf) a simplification of the [Katz's Backoff Model](https://en.wikipedia.org/wiki/Katz%27s_back-off_model)
+4. Cleaning of the training data
+5. Creation of [uni-, bi- and trigram](https://en.wikipedia.org/wiki/N-gram) 
+6. Creation of the prediction database from the three ngrams, by splitting its content into a "base"" (without last word), "prediction"" (last word) and its given "frequency"
+7. Manual testing for given test sentences from an external entity
+
+
+
+The Solution
+========================================================
+The prediction model is based on the [Stupid Backoff Model](http://www.aclweb.org/anthology/D07-1090.pdf) with three data sets, namely a unigram (0.2 MB), bigram (2.4 MB) and trigram (11.4 MB) with a total of 441894 entries.
+
+When using the [application](https://basacul.shinyapps.io/Ngrams/), the user simply types text in the appropriate textbox and a prediction will automatically be displayed in the output section in real time.
+
+If the most recent entries in the input are known as "base" to the database, the [model](https://github.com/basacul/Capstone/blob/master/src/shiny/model.R) calculates a score for each possible prediction. The predcition with the highest score will be returned. If not known to the model, the model suggests a random word in the unigram as prediction.
+
+Conclusion
+========================================================
+![application](caption.png)  
+Phone template by [PNG Arts](https://www.pngarts.com/explore/10599).
+***
+1. Amazingly Fast
+2. Astonishingly Simple
+3. Small Memory Footprint
+
+Version 2.0 will increase the size of the data set and number of ngrams. Moreover it will learn from the user and allow a personalization of the predictions for each individual mobile phone.  
+
+Hence, a smart phone for a smart user. 
+
