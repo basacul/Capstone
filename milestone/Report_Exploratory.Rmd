@@ -1,6 +1,6 @@
 ---
 title: "Exploratory Data Analysis"
-author: "Lucas Antelo"
+author: "basacul"
 date: "August 6, 2018"
 output:
   html_document: default
