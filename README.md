@@ -19,4 +19,4 @@ The [presentation of this application](http://rpubs.com/basacul/Ngrams) explains
 ## The Process
 1. preprocessData.R : The data is downloaded, unzipped and cleaned. Then 2gram, 3gram, 4gram, 5gram and 6gram is created and stored as RDS files
 2. generateModel.R :  The model is generated based on these ngrams. A data frame is built from all these ngrams split into base and predicion. This model is stored as RDS file
-3. predictWord.R :    This reads the rds file and checks if the n-1 words of the entry has a match in the model. If yes, return prediction. Otherwise return "and" or "I" depending on previously unknown word was already predicted or not. NEED TO UPDATE THIS PART AS SHINY APP USES MODIFIED VERSION CALL model.R
+3. predictWord.R :    This reads the rds file and checks if the n-1 words of the entry has a match in the model. If yes, return prediction. If no word was input return "and" or "I" depending on previously unknown word was already predicted or not. If not known to the model, return a random word from the unigram database.
